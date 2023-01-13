@@ -17,13 +17,13 @@
 # under the License.
 #
 
-FROM perftool/compile:cpp
+FROM shoothzj/compile:cpp
 
 RUN echo "begin build" && \
-    wget -q https://archive.apache.org/dist/pulsar/pulsar-2.10.1/DEB/apache-pulsar-client.deb && \
-    wget -q https://archive.apache.org/dist/pulsar/pulsar-2.10.1/DEB/apache-pulsar-client-dev.deb && \
-    apt-get install ./apache-pulsar-client.deb && \
-    apt-get install ./apache-pulsar-client-dev.deb && \
+    wget -q https://archive.apache.org/dist/pulsar/pulsar-client-cpp-3.1.0/deb-x86_64/apache-pulsar-client.deb && \
+    wget -q https://archive.apache.org/dist/pulsar/pulsar-client-cpp-3.1.0/deb-x86_64/apache-pulsar-client-dev.deb && \
+    dpkg -i ./apache-pulsar-client.deb && \
+    dpkg -i ./apache-pulsar-client-dev.deb && \
     rm -f apache-pulsar-client.deb && \
     rm -f apache-pulsar-client-dev.deb && \
     echo "end build"

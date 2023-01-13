@@ -26,13 +26,21 @@ using namespace std;
 using namespace pulsar;
 
 static string pulsarHost = EnvUtil::getEnv("PULSAR_HOST", "localhost");
-static int pulsarPort = EnvUtil::getEnv("PULSAR_PORT", 6650);
-static int messageSize = EnvUtil::getEnv("PULSAR_MESSAGE_SIZE", 1024);
+static int pulsarPort = EnvUtil::getEnvInt("PULSAR_PORT", 6650);
+static bool pulsarTlsEnable = EnvUtil::getEnvBool("PULSAR_TLS_ENABLE", false);
+static bool pulsarTlsAllowInsecureConnection = EnvUtil::getEnvBool("PULSAR_TLS_ALLOW_INSECURE_CONNECTION", false);
+static string pulsarAuthToken = EnvUtil::getEnv("PULSAR_AUTH_TOKEN", "");
 
 class Pulsar {
 public:
     [[noreturn]] static void start() {
         ClientConfiguration configuration = ClientConfiguration();
+        if (!pulsarAuthToken.empty()) {
+            configuration.setAuth(AuthToken::createWithToken(pulsarAuthToken));
+        }
+        if (pulsarTlsEnable) {
+            configuration.setTlsAllowInsecureConnection(pulsarTlsAllowInsecureConnection);
+        }
         Client client(getPulsarUrl(), configuration);
         Producer producer;
         Result result = client.createProducer(getenv("PULSAR_TOPIC"), producer);
@@ -55,7 +63,12 @@ public:
 private:
     static string getPulsarUrl() {
         std::ostringstream stringStream;
-        stringStream << "pulsar://" << pulsarHost << ":" << pulsarPort;
+        if (pulsarTlsEnable) {
+            stringStream << "pulsar+ssl://";
+        } else {
+            stringStream << "pulsar://";
+        }
+        stringStream << pulsarHost << ":" << pulsarPort;
         return stringStream.str();
     }
 };
